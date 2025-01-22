@@ -1,11 +1,12 @@
 #ifndef PASSGEN_H
 #define PASSGEN_H
-// #pragma once
 
 #include <QWidget>
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <QVBoxLayout>
+#include <QCheckBox>
+#include <QSpinBox>
+#include <QPushButton>
+#include <QLabel>
+#include <QGridLayout>
 
 class PassGen : public QWidget
 {
@@ -13,10 +14,15 @@ Q_OBJECT
 public:
     explicit PassGen(QWidget *parent = 0);
 private:
-    QPushButton button;
-    QLabel label;
+    QCheckBox lowerCase;
+    QCheckBox upperCase;
+    QCheckBox number;
+    QCheckBox symbol;
+    QSpinBox passwordLength;
+    QPushButton generate;
+    QLabel password;
     int count;
-    QVBoxLayout layout;
+    QGridLayout layout;
 signals:
 public slots:
 private slots:
