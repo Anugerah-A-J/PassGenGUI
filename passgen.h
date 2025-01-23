@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QGridLayout>
+#include <random>
 
 class PassGen : public QWidget
 {
@@ -14,19 +15,26 @@ Q_OBJECT
 public:
     explicit PassGen(QWidget *parent = 0);
 private:
-    QCheckBox lowerCase;
-    QCheckBox upperCase;
-    QCheckBox number;
-    QCheckBox symbol;
-    QSpinBox passwordLength;
+    QCheckBox lowerCaseCheckBox;
+    QCheckBox upperCaseCheckBox;
+    QCheckBox numberCheckBox;
+    QCheckBox symbolCheckBox;
+    QSpinBox passwordLengthSpinBox;
     QPushButton generate;
-    QLabel password;
-    int count;
+    QLabel passwordLabel;
     QGridLayout layout;
+    const std::string lowerCase;
+    const std::string upperCase;
+    const std::string number;
+    const std::string symbol;
+    unsigned int passwordLength;
+    std::string password;
+    const std::random_device rd;
+    std::string shuffled;
 signals:
 public slots:
 private slots:
-    void increaseCount();
+    void generatePassword();
 };
 
-#endif // WINDOW_H
+#endif // PASSGEN_H
