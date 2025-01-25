@@ -27,10 +27,7 @@ private:
     const std::string upperCase;
     const std::string number;
     const std::string symbol;
-    unsigned int passwordLength;
-    std::string password;
-    const std::random_device rd;
-    std::string shuffled;
+    std::random_device rd;
 signals:
 public slots:
 private slots:

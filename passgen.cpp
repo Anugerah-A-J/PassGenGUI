@@ -1,6 +1,6 @@
 #include "passgen.h"
-#include <algorithm>
-#include <random>
+#include <vector>
+#include <set>
 
 PassGen::PassGen(QWidget *parent):
     QWidget{parent},
@@ -16,13 +16,8 @@ PassGen::PassGen(QWidget *parent):
     upperCase{"QWERTYUIOPASDFGHJKLZXCVBNM"},
     number{"1234567890"},
     symbol{"!@#$%^&*()"},
-    passwordLength{0},
-    password{},
-    rd{},
-    shuffled{}
+    rd{}
 {
-    shuffled.reserve(lowerCase.size() + upperCase.size() + number.size() + symbol.size());
-
     layout.addWidget(&lowerCaseCheckBox, 0, 0);layout.addWidget(&upperCaseCheckBox, 0, 1);
     layout.addWidget(&numberCheckBox, 1, 0);layout.addWidget(&symbolCheckBox, 1, 1);
     layout.addWidget(&passwordLengthSpinBox, 2, 0);layout.addWidget(&generate, 2, 1);
@@ -35,37 +30,82 @@ PassGen::PassGen(QWidget *parent):
     numberCheckBox.setMinimumWidth(symbolCheckBox.width());
     passwordLengthSpinBox.setMinimum(9);
     passwordLengthSpinBox.setMaximum(99);
-    password.reserve(99);
     generate.setMinimumWidth(passwordLengthSpinBox.width());
     passwordLabel.setAlignment(Qt::AlignCenter);
 
-    connect(&generate, &QPushButton::clicked, this, &PassGen::generatePassword());
+    connect(&generate, &QPushButton::clicked, this, &PassGen::generatePassword);
 }
 
 void PassGen::generatePassword()
 {
-    passwordLength = passwordLengthSpinBox.value();
-    shuffled.clear();
-    password.clear();
+    unsigned int passwordLength{static_cast<unsigned int>(passwordLengthSpinBox.value())};
+    
+    std::string password;
+    password.reserve(passwordLength);
+
+    std::vector<const std::string*> characterKindContainer;
+    characterKindContainer.reserve(4);
 
     if (lowerCaseCheckBox.checkState() == Qt::Checked)
-        shuffled += lowerCase;
+        characterKindContainer.push_back(&lowerCase);
 
     if (upperCaseCheckBox.checkState() == Qt::Checked)
-        shuffled += upperCase;
+        characterKindContainer.push_back(&upperCase);
 
     if (numberCheckBox.checkState() == Qt::Checked)
-        shuffled += number;
+        characterKindContainer.push_back(&number);
 
     if (symbolCheckBox.checkState() == Qt::Checked)
-        shuffled += symbol;
+        characterKindContainer.push_back(&symbol);
 
-    std::shuffle(shuffled.begin(), shuffled.end(), rd);
+    if (characterKindContainer.empty())
+    {
+        passwordLabel.setText("");
+        return;
+    }
 
-    std::uniform_int_distribution<> dist{0, static_cast<int>(shuffled.size())};
+    std::uniform_int_distribution<> characterKindIndexDist{0, static_cast<int>(characterKindContainer.size() - 1)};
+    std::vector<std::uniform_int_distribution<>> characterIndexDist;
+    characterIndexDist.reserve(characterKindContainer.size());
 
-    for (int i = 0; i < passwordLength; ++i)
-        password.push_back(shuffled.at(dist(rd)));
+    for (auto c : characterKindContainer)
+        characterIndexDist.emplace_back(0, c->size() - 1);
 
-    passwordLabel.setText(password);
+    std::set<unsigned int> characterKindIndexContainer;
+    unsigned int characterKindIndex;
+
+    for (unsigned int i = 0; i < passwordLength; ++i)
+    {
+        characterKindIndex = characterKindIndexDist(rd);
+
+        // characterKindContainer.size():
+        // 2 -> tweak when characterKindIndexContainer.size() == 1 && i == passwordLength - 1
+        // 3 -> tweak when characterKindIndexContainer.size() == 2 && i == passwordLength - 1
+        // 3 -> tweak when characterKindIndexContainer.size() == 1 && i == passwordLength - 2
+        // ....
+        // tweak when characterKindIndexContainer.size() < characterKindContainer.size()
+        // && i == passwordLength - (characterKindContainer.size() - characterKindIndexContainer.size())
+        
+        if (characterKindIndexContainer.size() < characterKindContainer.size()
+            && i == passwordLength - (characterKindContainer.size() - characterKindIndexContainer.size()))
+        {
+            while(true)
+            {
+                if (characterKindIndexContainer.count(characterKindIndex) == 0)
+                    break;
+
+                characterKindIndex = characterKindIndexDist(rd);
+            }
+        }
+
+        characterKindIndexContainer.insert(characterKindIndex);
+
+        password.push_back(
+            characterKindContainer.at(characterKindIndex)->at(
+                characterIndexDist.at(characterKindIndex)(rd)
+            )
+        );
+    }
+
+    passwordLabel.setText(QString::fromStdString(password));
 }

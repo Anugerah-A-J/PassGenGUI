@@ -25,6 +25,12 @@ target_link_libraries(passgen PRIVATE
     Qt6::Widgets
 )
 
+if(MSVC)
+  target_compile_options(passgen PRIVATE /W4 /WX)
+else()
+  target_compile_options(passgen PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+
 # install(TARGETS gallery
 #     BUNDLE  DESTINATION .
 #     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
