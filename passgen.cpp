@@ -4,10 +4,13 @@
 
 PassGen::PassGen(QWidget *parent):
     QWidget{parent},
+    checkBoxGroupBox{"Password contain:", this},
+    checkBoxLayout{&checkBoxGroupBox},
     lowerCaseCheckBox{"a-z", this},
     upperCaseCheckBox{"A-Z", this},
     numberCheckBox{"0-9", this},
     symbolCheckBox{"!@#$%^&*()", this},
+    passwordLengthLabel{"Password length:", this},
     passwordLengthSpinBox{this},
     generate{"Generate", this},
     passwordLabel{this},
@@ -15,12 +18,14 @@ PassGen::PassGen(QWidget *parent):
     lowerCase{"qwertyuiopasdfghjklzxcvbnm"},
     upperCase{"QWERTYUIOPASDFGHJKLZXCVBNM"},
     number{"1234567890"},
-    symbol{"!@#$%^&*()"},
-    rd{}
+    symbol{"!@#$%^&*()"}
 {
-    layout.addWidget(&lowerCaseCheckBox, 0, 0);layout.addWidget(&upperCaseCheckBox, 0, 1);
-    layout.addWidget(&numberCheckBox, 1, 0);layout.addWidget(&symbolCheckBox, 1, 1);
-    layout.addWidget(&passwordLengthSpinBox, 2, 0);layout.addWidget(&generate, 2, 1);
+    checkBoxLayout.addWidget(&lowerCaseCheckBox, 0, 0);checkBoxLayout.addWidget(&upperCaseCheckBox, 0, 1);
+    checkBoxLayout.addWidget(&numberCheckBox, 1, 0);checkBoxLayout.addWidget(&symbolCheckBox, 1, 1);
+
+    layout.addWidget(&checkBoxGroupBox, 0, 0, 1, 2);
+    layout.addWidget(&passwordLengthLabel, 1, 0);layout.addWidget(&passwordLengthSpinBox, 1, 1);
+    layout.addWidget(&generate, 2, 0, 1, 2);
     layout.addWidget(&passwordLabel, 3, 0, 1, 2);
 
     lowerCaseCheckBox.setCheckState(Qt::Checked);
@@ -30,7 +35,6 @@ PassGen::PassGen(QWidget *parent):
     numberCheckBox.setMinimumWidth(symbolCheckBox.width());
     passwordLengthSpinBox.setMinimum(9);
     passwordLengthSpinBox.setMaximum(99);
-    generate.setMinimumWidth(passwordLengthSpinBox.width());
     passwordLabel.setAlignment(Qt::AlignCenter);
 
     connect(&generate, &QPushButton::clicked, this, &PassGen::generatePassword);
